@@ -20,6 +20,29 @@ camera.position.x = 4.95;
 camera.position.z = -6.05;
 camera.position.y = 4.41;
 
+// Add OrbitControls for camera movement
+let controls;
+if (typeof OrbitControls !== 'undefined') {
+    controls = new OrbitControls(camera, renderer.domElement);
+} else if (typeof THREE.OrbitControls !== 'undefined') {
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+} else {
+    console.error('OrbitControls not found. Camera controls will not be available.');
+}
+
+if (controls) {
+    controls.enableDamping = true; // Smooth camera movement
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 2;
+    controls.maxDistance = 50;
+    controls.maxPolarAngle = Math.PI / 2; // Prevent camera from going below the ground
+
+    // Set the target to look at the center of the stairs
+    controls.target.set(0, 1, 0.2);
+    controls.update();
+}
+
 // Add HDR environment map
 // Temporarily commented out due to EXRLoader issues
 /*
@@ -633,6 +656,11 @@ function animate() {
     requestAnimationFrame(animate);
 
     try {
+        // Update camera controls
+        if (controls) {
+            controls.update();
+        }
+
         // Update cube camera for dynamic reflections
         if (cubeCamera && cubeRenderTarget) {
             floor.visible = false; // Hide floor during cube camera rendering
