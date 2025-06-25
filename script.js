@@ -4,11 +4,10 @@
 // Create the scene
 const scene = new THREE.Scene();
 
-// Set up the renderer with antialiasing and higher resolution
+// Set up the renderer with antialiasing and full window size
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-const resolutionMultiplier = 0.8; // Set to 1 for initial testing
-renderer.setSize(window.innerWidth * resolutionMultiplier, window.innerHeight * resolutionMultiplier);
-renderer.setPixelRatio(window.devicePixelRatio * resolutionMultiplier);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true; // Enable shadow mapping
 renderer.shadowMap.type = THREE.PCFShadowMap; // Enable soft shadows PCFShadowMap is faster
 document.body.appendChild(renderer.domElement);
@@ -125,6 +124,9 @@ step3.castShadow = true;
 scene.add(step1);
 scene.add(step2);
 scene.add(step3);
+
+// Point the camera towards stair step 1 (after step1 is created)
+camera.lookAt(step1.position);
 
 // Create the table
 const tableTop = new THREE.Mesh(new THREE.BoxGeometry(5, 0.2, 5), woodMaterial);
@@ -651,3 +653,10 @@ function animate() {
 }
 
 animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
