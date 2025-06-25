@@ -173,8 +173,9 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene,
 // FBX Model: Plant
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'plant.glb', scene, (meshes) => {
     const plant = meshes[0].parent || meshes[0];
-    plant.scaling.set(2, 2, 2);
-    plant.position.set(0, -1.5, 9.5);
+    plant.scaling.set(4, 4, 4);
+    plant.position.set(-7, -2.5, 7.9);
+    plant.rotation.set(0, 0, 0);
     plant.name = 'Plant';
     populateObjectList(); // Ensure UI updates after plant is loaded
 });
