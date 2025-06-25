@@ -21,18 +21,16 @@ camera.position.x = 4.95;
 camera.position.z = -6.05;
 camera.position.y = 4.41;
 
-// Add orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Optional for smoother controls
-controls.dampingFactor = 0.05; // Optional
-
 // Add HDR environment map
+// Temporarily commented out due to EXRLoader issues
+/*
 const exrLoader = new EXRLoader();
 exrLoader.load('/assets/hdr_environment.exr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture;
     scene.background = texture;
 });
+*/
 
 // Load textures
 const textureLoader = new THREE.TextureLoader();
@@ -322,6 +320,8 @@ additionalLight2.position.set(0, 10, 0);
 additionalLight2.castShadow = true;
 scene.add(additionalLight2);
 
+// Temporarily commented out due to GLTFLoader and FBXLoader issues
+/*
 const gltfLoader = new GLTFLoader();
 
 gltfLoader.load(
@@ -430,6 +430,7 @@ gltfLoader.load(
         console.error('Error loading Counterpusher model:', error);
     }
 );
+*/
 
 
 // Add Camera Coordinates Display
@@ -636,8 +637,6 @@ function animate() {
             cubeCamera.update(renderer, scene);
             floor.visible = true; // Show floor after rendering
         }
-
-        controls.update(); // Update camera controls
 
         // Get camera coordinates for debugging
         const x = camera.position.x.toFixed(2);
