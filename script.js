@@ -50,10 +50,10 @@ scene.onBeforeRenderObservable.add(() => {
 window.addEventListener('contextmenu', e => e.preventDefault());
 window.addEventListener('wheel', e => e.preventDefault(), { passive: false });
 
-// Environment map (HDR)
-const hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('/assets/hdr_environment.env', scene);
-scene.environmentTexture = hdrTexture;
-scene.createDefaultSkybox(hdrTexture, true, 1000);
+// Environment map (.env)
+const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('/assets/pine_picnic_4k.env', scene);
+scene.environmentTexture = envTexture;
+scene.createDefaultSkybox(envTexture, true, 1000);
 
 // Texture loader helper
 function loadTexture(path) {
@@ -123,13 +123,16 @@ tableLeg4.material = woodMaterial;
 // Floor (reflective stone)
 const floor = BABYLON.MeshBuilder.CreateGround('Floor', {width:20, height:20}, scene);
 floor.position.set(0, -2.5, 0);
-const reflectiveStoneMaterial = new BABYLON.StandardMaterial('reflectiveStone', scene);
-reflectiveStoneMaterial.diffuseTexture = loadTexture('/stone_texture.jpg');
+const reflectiveStoneMaterial = new BABYLON.PBRMaterial('reflectiveStone', scene);
+reflectiveStoneMaterial.albedoTexture = loadTexture('/stone_texture.jpg');
 reflectiveStoneMaterial.bumpTexture = loadTexture('/stone_normal.png');
 reflectiveStoneMaterial.ambientTexture = loadTexture('/stone_ao.jpg');
 reflectiveStoneMaterial.metallicTexture = loadTexture('/stone_metallic.jpg');
-reflectiveStoneMaterial.displacementTexture = loadTexture('/stone_displacement.tiff');
-reflectiveStoneMaterial.specularPower = 128;
+reflectiveStoneMaterial.microSurfaceTexture = loadTexture('/stone_displacement.tiff');
+reflectiveStoneMaterial.environmentTexture = envTexture;
+reflectiveStoneMaterial.reflectivityColor = new BABYLON.Color3(1, 1, 1);
+reflectiveStoneMaterial.metallic = 1.0;
+reflectiveStoneMaterial.roughness = 0.1;
 floor.material = reflectiveStoneMaterial;
 
 // Walls
