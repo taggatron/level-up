@@ -602,7 +602,7 @@ objectList.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
 objectList.style.padding = '10px';
 document.body.appendChild(objectList);
 
-// Add Position Controls for X, Y, Z
+// Add Position Controls for X, Y, Z, Rotation, Scale
 const positionControls = document.createElement('div');
 positionControls.style.position = 'absolute';
 positionControls.style.bottom = '50px';
@@ -613,40 +613,54 @@ positionControls.style.padding = '10px';
 positionControls.style.display = 'none';
 document.body.appendChild(positionControls);
 
-const createPositionInput = (axis) => {
+const createPositionInput = (axis, labelName) => {
     const container = document.createElement('div');
     const label = document.createElement('span');
-    label.textContent = `${axis.toUpperCase()}: `;
+    label.textContent = `${labelName.toUpperCase()}: `;
     const input = document.createElement('input');
     input.type = 'number';
     input.step = '0.1';
     input.style.width = '60px';
-
     container.appendChild(label);
     container.appendChild(input);
     positionControls.appendChild(container);
     return input;
 };
 
-const xInput = createPositionInput('x');
-const yInput = createPositionInput('y');
-const zInput = createPositionInput('z');
+const xInput = createPositionInput('x', 'Position X');
+const yInput = createPositionInput('y', 'Position Y');
+const zInput = createPositionInput('z', 'Position Z');
+const rxInput = createPositionInput('rx', 'Rotation X');
+const ryInput = createPositionInput('ry', 'Rotation Y');
+const rzInput = createPositionInput('rz', 'Rotation Z');
+const sxInput = createPositionInput('sx', 'Scale X');
+const syInput = createPositionInput('sy', 'Scale Y');
+const szInput = createPositionInput('sz', 'Scale Z');
 
 // Add Update Position Button
 const updateButton = document.createElement('button');
-updateButton.textContent = 'Update Position';
+updateButton.textContent = 'Update Object';
 updateButton.style.marginTop = '10px';
 positionControls.appendChild(updateButton);
 
 updateButton.addEventListener('click', () => {
     if (selectedObject) {
-        console.log('Updating position for:', selectedObject.name); // Debugging log
+        console.log('Updating object for:', selectedObject.name); // Debugging log
+        // Update Position
         selectedObject.position.x = parseFloat(xInput.value);
         selectedObject.position.y = parseFloat(yInput.value);
         selectedObject.position.z = parseFloat(zInput.value);
+        // Update Rotation
+        selectedObject.rotation.x = THREE.MathUtils.degToRad(parseFloat(rxInput.value));
+        selectedObject.rotation.y = THREE.MathUtils.degToRad(parseFloat(ryInput.value));
+        selectedObject.rotation.z = THREE.MathUtils.degToRad(parseFloat(rzInput.value));
+        // Update Scale
+        selectedObject.scale.x = parseFloat(sxInput.value);
+        selectedObject.scale.y = parseFloat(syInput.value);
+        selectedObject.scale.z = parseFloat(szInput.value);
         updateObjectInfo(selectedObject);
     } else {
-        console.warn('No object selected to update position.'); // Debugging log
+        console.warn('No object selected to update.'); // Debugging log
     }
 });
 
@@ -654,9 +668,18 @@ updateButton.addEventListener('click', () => {
 function updatePositionInputs(object) {
     if (object) {
         console.log('updatePositionInputs called for object:', object.name); // Debugging log
+        // Position
         xInput.value = object.position.x.toFixed(2);
         yInput.value = object.position.y.toFixed(2);
         zInput.value = object.position.z.toFixed(2);
+        // Rotation
+        rxInput.value = THREE.MathUtils.radToDeg(object.rotation.x).toFixed(2);
+        ryInput.value = THREE.MathUtils.radToDeg(object.rotation.y).toFixed(2);
+        rzInput.value = THREE.MathUtils.radToDeg(object.rotation.z).toFixed(2);
+        // Scale
+        sxInput.value = object.scale.x.toFixed(2);
+        syInput.value = object.scale.y.toFixed(2);
+        szInput.value = object.scale.z.toFixed(2);
         if (positionControls.style.display !== 'block') {
             console.log('Setting positionControls display to block.');
         }
@@ -677,13 +700,13 @@ function updateObjectInfo(object) {
     }
     const position = object.position;
     const scale = object.scale;
-
+    const rotation = object.rotation;
     objectInfo.innerHTML = `
         <strong>Selected Object:</strong><br>
         Position: X: ${position.x.toFixed(2)}, Y: ${position.y.toFixed(2)}, Z: ${position.z.toFixed(2)}<br>
+        Rotation: X: ${THREE.MathUtils.radToDeg(rotation.x).toFixed(2)}, Y: ${THREE.MathUtils.radToDeg(rotation.y).toFixed(2)}, Z: ${THREE.MathUtils.radToDeg(rotation.z).toFixed(2)}<br>
         Scale: X: ${scale.x.toFixed(2)}, Y: ${scale.y.toFixed(2)}, Z: ${scale.z.toFixed(2)}
     `;
-
     console.log('Updated objectInfo with object:', object.name); // Debugging log
     updatePositionInputs(object);
 }
@@ -760,34 +783,37 @@ function populateObjectList() {
 
 populateObjectList();
 
-
-
-// Animate Function
+// Animate Function with Counter Pusher animation
+let direction = 1; // 1 for forward, -1 for backward
+const speed = 0.01; // Animation speed
 function animate() {
     requestAnimationFrame(animate);
-
     try {
         // Update keyboard camera movement
         updateCameraMovement();
-        
         // Update camera controls
         if (controls) {
             controls.update();
         }
-
         // Update cube camera for dynamic reflections
         if (cubeCamera && cubeRenderTarget) {
             floor.visible = false; // Hide floor during cube camera rendering
             cubeCamera.update(renderer, scene);
             floor.visible = true; // Show floor after rendering
         }
-
+        // Counter Pusher animation
+        const counterPusher = scene.getObjectByName('Counter Pusher');
+        if (counterPusher) {
+            counterPusher.position.z += direction * speed;
+            if (counterPusher.position.z > -1 || counterPusher.position.z < -3) {
+                direction *= -1;
+            }
+        }
         // Get camera coordinates for debugging
         const x = camera.position.x.toFixed(2);
         const y = camera.position.y.toFixed(2);
         const z = camera.position.z.toFixed(2);
         cameraCoords.textContent = `Camera Position: X: ${x}, Y: ${y}, Z: ${z}`;
-
         renderer.render(scene, camera);
     } catch (error) {
         console.error('Error during animation loop:', error);
