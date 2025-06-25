@@ -1,3 +1,4 @@
+import * as THREE from '../libs/three.module.js';
 import {
 	Curve,
 	Vector3,

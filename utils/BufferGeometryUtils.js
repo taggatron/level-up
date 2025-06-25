@@ -1,15 +1,4 @@
-import {
-	BufferAttribute,
-	BufferGeometry,
-	Float32BufferAttribute,
-	InstancedBufferAttribute,
-	InterleavedBuffer,
-	InterleavedBufferAttribute,
-	TriangleFanDrawMode,
-	TriangleStripDrawMode,
-	TrianglesDrawMode,
-	Vector3,
-} from 'three';
+import * as THREE from '../libs/three.module.js';
 
 function computeMikkTSpaceTangents( geometry, MikkTSpace, negateSign = true ) {
 
@@ -87,7 +76,7 @@ function computeMikkTSpaceTangents( geometry, MikkTSpace, negateSign = true ) {
 
 	//
 
-	_geometry.setAttribute( 'tangent', new BufferAttribute( tangents, 4 ) );
+	_geometry.setAttribute( 'tangent', new THREE.BufferAttribute( tangents, 4 ) );
 
 	if ( geometry !== _geometry ) {
 
@@ -116,7 +105,7 @@ function mergeGeometries( geometries, useGroups = false ) {
 
 	const morphTargetsRelative = geometries[ 0 ].morphTargetsRelative;
 
-	const mergedGeometry = new BufferGeometry();
+	const mergedGeometry = new THREE.BufferGeometry();
 
 	let offset = 0;
 
@@ -365,7 +354,7 @@ function mergeAttributes( attributes ) {
 
 	}
 
-	const result = new BufferAttribute( array, itemSize, normalized );
+	const result = new THREE.BufferAttribute( array, itemSize, normalized );
 	if ( gpuType !== undefined ) {
 
 		result.gpuType = gpuType;
@@ -390,11 +379,11 @@ export function deepCloneAttribute( attribute ) {
 
 	if ( attribute.isInstancedBufferAttribute ) {
 
-		return new InstancedBufferAttribute().copy( attribute );
+		return new THREE.InstancedBufferAttribute().copy( attribute );
 
 	}
 
-	return new BufferAttribute().copy( attribute );
+	return new THREE.BufferAttribute().copy( attribute );
 
 }
 
@@ -429,7 +418,7 @@ function interleaveAttributes( attributes ) {
 	}
 
 	// Create the set of buffer attributes
-	const interleavedBuffer = new InterleavedBuffer( new TypedArray( arrayLength ), stride );
+	const interleavedBuffer = new THREE.InterleavedBuffer( new TypedArray( arrayLength ), stride );
 	let offset = 0;
 	const res = [];
 	const getters = [ 'getX', 'getY', 'getZ', 'getW' ];
@@ -440,7 +429,7 @@ function interleaveAttributes( attributes ) {
 		const attribute = attributes[ j ];
 		const itemSize = attribute.itemSize;
 		const count = attribute.count;
-		const iba = new InterleavedBufferAttribute( interleavedBuffer, itemSize, offset, attribute.normalized );
+		const iba = new THREE.InterleavedBufferAttribute( interleavedBuffer, itemSize, offset, attribute.normalized );
 		res.push( iba );
 
 		offset += itemSize;
@@ -475,11 +464,11 @@ export function deinterleaveAttribute( attribute ) {
 	let newAttribute;
 	if ( attribute.isInstancedInterleavedBufferAttribute ) {
 
-		newAttribute = new InstancedBufferAttribute( array, itemSize, normalized, attribute.meshPerAttribute );
+		newAttribute = new THREE.InstancedBufferAttribute( array, itemSize, normalized, attribute.meshPerAttribute );
 
 	} else {
 
-		newAttribute = new BufferAttribute( array, itemSize, normalized );
+		newAttribute = new THREE.BufferAttribute( array, itemSize, normalized );
 
 	}
 
@@ -611,7 +600,7 @@ function mergeVertices( geometry, tolerance = 1e-4 ) {
 		const name = attributeNames[ i ];
 		const attr = geometry.attributes[ name ];
 
-		tmpAttributes[ name ] = new BufferAttribute(
+		tmpAttributes[ name ] = new THREE.BufferAttribute(
 			new attr.array.constructor( attr.count * attr.itemSize ),
 			attr.itemSize,
 			attr.normalized
@@ -620,7 +609,7 @@ function mergeVertices( geometry, tolerance = 1e-4 ) {
 		const morphAttr = geometry.morphAttributes[ name ];
 		if ( morphAttr ) {
 
-			tmpMorphAttributes[ name ] = new BufferAttribute(
+			tmpMorphAttributes[ name ] = new THREE.BufferAttribute(
 				new morphAttr.array.constructor( morphAttr.count * morphAttr.itemSize ),
 				morphAttr.itemSize,
 				morphAttr.normalized
@@ -706,7 +695,7 @@ function mergeVertices( geometry, tolerance = 1e-4 ) {
 
 		const tmpAttribute = tmpAttributes[ name ];
 
-		result.setAttribute( name, new BufferAttribute(
+		result.setAttribute( name, new THREE.BufferAttribute(
 			tmpAttribute.array.slice( 0, nextIndex * tmpAttribute.itemSize ),
 			tmpAttribute.itemSize,
 			tmpAttribute.normalized,
@@ -718,7 +707,7 @@ function mergeVertices( geometry, tolerance = 1e-4 ) {
 
 			const tmpMorphAttribute = tmpMorphAttributes[ name ][ j ];
 
-			result.morphAttributes[ name ][ j ] = new BufferAttribute(
+			result.morphAttributes[ name ][ j ] = new THREE.BufferAttribute(
 				tmpMorphAttribute.array.slice( 0, nextIndex * tmpMorphAttribute.itemSize ),
 				tmpMorphAttribute.itemSize,
 				tmpMorphAttribute.normalized,
@@ -743,14 +732,14 @@ function mergeVertices( geometry, tolerance = 1e-4 ) {
  */
 function toTrianglesDrawMode( geometry, drawMode ) {
 
-	if ( drawMode === TrianglesDrawMode ) {
+	if ( drawMode === THREE.TrianglesDrawMode ) {
 
 		console.warn( 'THREE.BufferGeometryUtils.toTrianglesDrawMode(): Geometry already defined as triangles.' );
 		return geometry;
 
 	}
 
-	if ( drawMode === TriangleFanDrawMode || drawMode === TriangleStripDrawMode ) {
+	if ( drawMode === THREE.TriangleFanDrawMode || drawMode === THREE.TriangleStripDrawMode ) {
 
 		let index = geometry.getIndex();
 
@@ -787,7 +776,7 @@ function toTrianglesDrawMode( geometry, drawMode ) {
 		const numberOfTriangles = index.count - 2;
 		const newIndices = [];
 
-		if ( drawMode === TriangleFanDrawMode ) {
+		if ( drawMode === THREE.TriangleFanDrawMode ) {
 
 			// gl.TRIANGLE_FAN
 
@@ -854,17 +843,17 @@ function toTrianglesDrawMode( geometry, drawMode ) {
  */
 function computeMorphedAttributes( object ) {
 
-	const _vA = new Vector3();
-	const _vB = new Vector3();
-	const _vC = new Vector3();
+	const _vA = new THREE.Vector3();
+	const _vB = new THREE.Vector3();
+	const _vC = new THREE.Vector3();
 
-	const _tempA = new Vector3();
-	const _tempB = new Vector3();
-	const _tempC = new Vector3();
+	const _tempA = new THREE.Vector3();
+	const _tempB = new THREE.Vector3();
+	const _tempC = new THREE.Vector3();
 
-	const _morphA = new Vector3();
-	const _morphB = new Vector3();
-	const _morphC = new Vector3();
+	const _morphA = new THREE.Vector3();
+	const _morphB = new THREE.Vector3();
+	const _morphC = new THREE.Vector3();
 
 	function _calculateMorphedAttributeData(
 		object,
@@ -1112,8 +1101,8 @@ function computeMorphedAttributes( object ) {
 
 	}
 
-	const morphedPositionAttribute = new Float32BufferAttribute( modifiedPosition, 3 );
-	const morphedNormalAttribute = new Float32BufferAttribute( modifiedNormal, 3 );
+	const morphedPositionAttribute = new THREE.Float32BufferAttribute( modifiedPosition, 3 );
+	const morphedNormalAttribute = new THREE.Float32BufferAttribute( modifiedNormal, 3 );
 
 	return {
 
@@ -1244,11 +1233,11 @@ function toCreasedNormals( geometry, creaseAngle = Math.PI / 3 /* 60 degrees */ 
 	const hashMultiplier = ( 1 + 1e-10 ) * 1e2;
 
 	// reusable vectors
-	const verts = [ new Vector3(), new Vector3(), new Vector3() ];
-	const tempVec1 = new Vector3();
-	const tempVec2 = new Vector3();
-	const tempNorm = new Vector3();
-	const tempNorm2 = new Vector3();
+	const verts = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+	const tempVec1 = new THREE.Vector3();
+	const tempVec2 = new THREE.Vector3();
+	const tempNorm = new THREE.Vector3();
+	const tempNorm2 = new THREE.Vector3();
 
 	// hashes a vector
 	function hashVertex( v ) {
@@ -1278,7 +1267,7 @@ function toCreasedNormals( geometry, creaseAngle = Math.PI / 3 /* 60 degrees */ 
 		tempVec2.subVectors( a, b );
 
 		// add the normal to the map for all vertices
-		const normal = new Vector3().crossVectors( tempVec1, tempVec2 ).normalize();
+		const normal = new THREE.Vector3().crossVectors( tempVec1, tempVec2 ).normalize();
 		for ( let n = 0; n < 3; n ++ ) {
 
 			const vert = verts[ n ];
@@ -1298,7 +1287,7 @@ function toCreasedNormals( geometry, creaseAngle = Math.PI / 3 /* 60 degrees */ 
 	// average normals from all vertices that share a common location if they are within the
 	// provided crease threshold
 	const normalArray = new Float32Array( posAttr.count * 3 );
-	const normAttr = new BufferAttribute( normalArray, 3, false );
+	const normAttr = new THREE.BufferAttribute( normalArray, 3, false );
 	for ( let i = 0, l = posAttr.count / 3; i < l; i ++ ) {
 
 		// get the face normal for this vertex
