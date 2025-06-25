@@ -171,18 +171,12 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene,
 });
 
 // FBX Model: Plant
-BABYLON.SceneLoader.ImportMesh('', '/assets/', 'PlantOrchid001.fbx', scene, (meshes) => {
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'plant.glb', scene, (meshes) => {
     const plant = meshes[0].parent || meshes[0];
-    plant.scaling.set(0.05, 0.05, 0.05);
+    plant.scaling.set(2, 2, 2);
     plant.position.set(0, -1.5, 9.5);
-    const plantMat = new BABYLON.StandardMaterial('plantMat', scene);
-    plantMat.diffuseTexture = loadTexture('/assets/PlantOrchid001_COL_4K_METALNESS.jpg');
-    plantMat.bumpTexture = loadTexture('/assets/PlantOrchid001_NRM_4K_METALNESS.jpg');
-    plantMat.roughness = 1.0;
-    plantMat.metallicTexture = loadTexture('/assets/PlantOrchid001_METALNESS_4K_METALNESS.png');
-    plantMat.ambientTexture = loadTexture('/assets/PlantOrchid001_SSS_4K_METALNESS.jpg');
-    plant.getChildMeshes().forEach(mesh => mesh.material = plantMat);
-    plant.name = 'Plant Orchid';
+    plant.name = 'Plant';
+    populateObjectList(); // Ensure UI updates after plant is loaded
 });
 
 // GLB Model: Counterpusher
