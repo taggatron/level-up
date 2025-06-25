@@ -1,5 +1,9 @@
-// Remove all import statements and use global THREE, GLTFLoader, FBXLoader, EXRLoader, OrbitControls
-// (CDN scripts will be loaded in index.html)
+// Use ES Modules for Three.js and loaders
+import * as THREE from './libs/three.module.js';
+import { OrbitControls } from './libs/OrbitControls.js';
+import { GLTFLoader } from './libs/GLTFLoader.js';
+import { FBXLoader } from './libs/FBXLoader.js';
+import { EXRLoader } from './libs/EXRLoader.js';
 
 // Create the scene
 const scene = new THREE.Scene();
@@ -22,26 +26,18 @@ camera.position.y = 4.41;
 
 // Add OrbitControls for camera movement
 let controls;
-if (typeof OrbitControls !== 'undefined') {
-    controls = new OrbitControls(camera, renderer.domElement);
-} else if (typeof THREE.OrbitControls !== 'undefined') {
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-} else {
-    console.error('OrbitControls not found. Camera controls will not be available.');
-}
+controls = new OrbitControls(camera, renderer.domElement);
 
-if (controls) {
-    controls.enableDamping = true; // Smooth camera movement
-    controls.dampingFactor = 0.05;
-    controls.screenSpacePanning = false;
-    controls.minDistance = 2;
-    controls.maxDistance = 50;
-    controls.maxPolarAngle = Math.PI / 2; // Prevent camera from going below the ground
+controls.enableDamping = true; // Smooth camera movement
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false;
+controls.minDistance = 2;
+controls.maxDistance = 50;
+controls.maxPolarAngle = Math.PI / 2; // Prevent camera from going below the ground
 
-    // Set the target to look at the center of the stairs
-    controls.target.set(0, 1, 0.2);
-    controls.update();
-}
+// Set the target to look at the center of the stairs
+controls.target.set(0, 1, 0.2);
+controls.update();
 
 // Keyboard controls for camera movement
 const keys = {
@@ -134,15 +130,12 @@ document.addEventListener('wheel', (event) => {
 }, { passive: false });
 
 // Add HDR environment map
-// Temporarily commented out due to EXRLoader issues
-/*
 const exrLoader = new EXRLoader();
 exrLoader.load('/assets/hdr_environment.exr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture;
     scene.background = texture;
 });
-*/
 
 // Load textures
 const textureLoader = new THREE.TextureLoader();
@@ -437,10 +430,8 @@ additionalLight2.position.set(0, 10, 0);
 additionalLight2.castShadow = true;
 scene.add(additionalLight2);
 
-// Temporarily commented out due to GLTFLoader and FBXLoader issues
-/*
+// GLTFLoader for .glb/.gltf
 const gltfLoader = new GLTFLoader();
-
 gltfLoader.load(
     '/assets/leveluptitle3dwords.glb',
     (gltf) => {
@@ -448,9 +439,7 @@ gltfLoader.load(
         const box = new THREE.Box3().setFromObject(model);
         const center = new THREE.Vector3();
         box.getCenter(center);
-
         model.position.sub(center); // Recenter the model to origin
-
         model.traverse((child) => {
              if(child.isMesh) {
                 child.material = levelUpTitleMaterial;
@@ -466,15 +455,14 @@ gltfLoader.load(
     }
 );
 
+// FBXLoader for .fbx
 const fbxLoader = new FBXLoader();
-
 fbxLoader.load(
     '/assets/PlantOrchid001.fbx',
     (fbx) => {
         // Adjust scale and position if necessary
         fbx.scale.set(0.05, 0.05, 0.05);
         fbx.position.set(0, -1.5, 9.5); // Position the plant near the front wall
-
         // Load and assign materials
         const material = new THREE.MeshStandardMaterial({
             map: textureLoader.load('/assets/PlantOrchid001_COL_4K_METALNESS.jpg'),
@@ -483,7 +471,6 @@ fbxLoader.load(
             metalnessMap: textureLoader.load('/assets/PlantOrchid001_METALNESS_4K_METALNESS.png'),
             aoMap: textureLoader.load('/assets/PlantOrchid001_SSS_4K_METALNESS.jpg'),
         });
-
         fbx.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -491,7 +478,6 @@ fbxLoader.load(
                 child.material = material;
             }
         });
-
         scene.add(fbx);
     },
     (xhr) => {
@@ -507,13 +493,11 @@ gltfLoader.load(
     '/assets/counterpusher.glb',
     (gltf) => {
         const model = gltf.scene;
-
         // Apply main texture and board-related textures
         const mainTexture = textureLoader.load('/lvltitleholder.jpg');
         const boardTexture = textureLoader.load('/board_texture.jpg');
         const boardNormalMap = textureLoader.load('/board_normal.png');
         const boardMetallicMap = textureLoader.load('/board_metallic.jpg');
-
         const customMaterial = new THREE.MeshStandardMaterial({
             map: mainTexture,
             normalMap: boardNormalMap,
@@ -521,7 +505,6 @@ gltfLoader.load(
             metalnessMap: boardMetallicMap,
             normalScale: new THREE.Vector2(1, 1),
         });
-
         // Traverse the model to apply the material
         model.traverse((child) => {
             if (child.isMesh) {
@@ -530,14 +513,11 @@ gltfLoader.load(
                 child.receiveShadow = true;
             }
         });
-
         // Adjust scale and position if necessary
         model.scale.set(0.5, 0.5, 0.5);
         model.position.set(0, 0, 0);
-
         // Assign name to the model
         model.name = 'Counter Pusher';
-
         // Add the model to the scene
         scene.add(model);
         populateObjectList(); // Refresh UI list after adding the model
@@ -547,7 +527,6 @@ gltfLoader.load(
         console.error('Error loading Counterpusher model:', error);
     }
 );
-*/
 
 
 // Add Camera Coordinates Display
