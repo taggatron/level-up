@@ -1,3 +1,5 @@
+// This file has been renamed to script.js. Please use script.js as your main entry point.
+
 // Remove all import statements and use global THREE, GLTFLoader, FBXLoader, EXRLoader, OrbitControls
 // (CDN scripts will be loaded in index.html)
 
