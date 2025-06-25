@@ -1,6 +1,5 @@
 // Babylon.js version of the original Three.js scene
-import * as BABYLON from 'babylonjs';
-import 'babylonjs-loaders';
+// Babylon.js and loaders are loaded via CDN in index.html, so no imports are needed here.
 
 // Create canvas and engine
 const canvas = document.createElement('canvas');
@@ -52,10 +51,9 @@ window.addEventListener('contextmenu', e => e.preventDefault());
 window.addEventListener('wheel', e => e.preventDefault(), { passive: false });
 
 // Environment map (HDR)
-BABYLON.CubeTexture.CreateFromPrefilteredData('/assets/hdr_environment.env', scene, (hdrTexture) => {
-    scene.environmentTexture = hdrTexture;
-    scene.createDefaultSkybox(hdrTexture, true, 1000);
-});
+const hdrTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('/assets/hdr_environment.env', scene);
+scene.environmentTexture = hdrTexture;
+scene.createDefaultSkybox(hdrTexture, true, 1000);
 
 // Texture loader helper
 function loadTexture(path) {

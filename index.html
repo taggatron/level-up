@@ -17,14 +17,11 @@
       display: block;
     }
   </style>
-  <!-- Babylon.js CDN for browser use (for dev/test convenience) -->
-  <script type="module">
-    import * as BABYLON from 'https://cdn.jsdelivr.net/npm/babylonjs@6.47.0/babylon.js';
-    window.BABYLON = BABYLON;
-    import 'https://cdn.jsdelivr.net/npm/babylonjs-loaders@6.47.0/babylonjs.loaders.min.js';
-  </script>
+  <!-- Babylon.js and loaders as global scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/babylonjs@6.47.0/babylon.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babylonjs-loaders@6.47.0/babylonjs.loaders.min.js"></script>
 </head>
 <body>
-  <script type="module" src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
