@@ -340,6 +340,7 @@ scene.add(wall2);
 scene.add(wall3);
 
 
+/*
 const prismMaterial = new THREE.MeshStandardMaterial({ 
     color: 0x00ff00, // Green material
     side: THREE.DoubleSide // Render both sides of the faces
@@ -409,6 +410,7 @@ combinedObject.position.set(3,3,2);
 
 // Add the combined object to the scene
 scene.add(combinedObject);
+*/
 
 
 // Add lighting
@@ -740,7 +742,6 @@ setObjectName('Table Leg Front Right', tableLeg1);
 setObjectName('Table Leg Front Left', tableLeg2);
 setObjectName('Table Leg Back Right', tableLeg3);
 setObjectName('Table Leg Back Left', tableLeg4);
-setObjectName('Triangular Prism', prism);
 setObjectName('Floor', floor);
 
 // Assign names to imported 3D objects
