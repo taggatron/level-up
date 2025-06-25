@@ -43,6 +43,96 @@ if (controls) {
     controls.update();
 }
 
+// Keyboard controls for camera movement
+const keys = {
+    w: false, s: false, a: false, d: false,
+    q: false, e: false, // Up and down movement
+    shift: false // Speed modifier
+};
+
+const cameraSpeed = 0.1;
+const fastSpeed = 0.3;
+
+// Track key states
+document.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) {
+        keys[key] = true;
+        event.preventDefault(); // Prevent default browser behavior
+    }
+    if (event.key === 'Shift') {
+        keys.shift = true;
+        event.preventDefault();
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    const key = event.key.toLowerCase();
+    if (keys.hasOwnProperty(key)) {
+        keys[key] = false;
+        event.preventDefault();
+    }
+    if (event.key === 'Shift') {
+        keys.shift = false;
+        event.preventDefault();
+    }
+});
+
+// Function to update camera position based on keyboard input
+function updateCameraMovement() {
+    if (!controls) return;
+    
+    const speed = keys.shift ? fastSpeed : cameraSpeed;
+    const direction = new THREE.Vector3();
+    const right = new THREE.Vector3();
+    
+    // Get camera direction vectors
+    camera.getWorldDirection(direction);
+    right.crossVectors(camera.up, direction).normalize();
+    
+    // Forward/Backward (W/S)
+    if (keys.w) {
+        camera.position.addScaledVector(direction, speed);
+        controls.target.addScaledVector(direction, speed);
+    }
+    if (keys.s) {
+        camera.position.addScaledVector(direction, -speed);
+        controls.target.addScaledVector(direction, -speed);
+    }
+    
+    // Left/Right (A/D)
+    if (keys.a) {
+        camera.position.addScaledVector(right, speed);
+        controls.target.addScaledVector(right, speed);
+    }
+    if (keys.d) {
+        camera.position.addScaledVector(right, -speed);
+        controls.target.addScaledVector(right, -speed);
+    }
+    
+    // Up/Down (Q/E)
+    if (keys.q && camera.position.y > 0.5) { // Prevent going below a minimum height
+        camera.position.y -= speed;
+        controls.target.y -= speed;
+    }
+    if (keys.e) {
+        camera.position.y += speed;
+        controls.target.y += speed;
+    }
+    
+    controls.update();
+}
+
+// Prevent context menu on right click
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+});
+
+// Prevent scrolling with mouse wheel when not over the canvas
+document.addEventListener('wheel', (event) => {
+    event.preventDefault();
+}, { passive: false });
+
 // Add HDR environment map
 // Temporarily commented out due to EXRLoader issues
 /*
@@ -466,6 +556,27 @@ cameraCoords.style.left = '10px';
 cameraCoords.style.color = 'white';
 document.body.appendChild(cameraCoords);
 
+// Add Controls Help Display
+const controlsHelp = document.createElement('div');
+controlsHelp.style.position = 'absolute';
+controlsHelp.style.top = '10px';
+controlsHelp.style.right = '10px';
+controlsHelp.style.color = 'white';
+controlsHelp.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+controlsHelp.style.padding = '10px';
+controlsHelp.style.fontSize = '12px';
+controlsHelp.style.borderRadius = '5px';
+controlsHelp.innerHTML = `
+    <strong>Camera Controls:</strong><br>
+    Mouse: Orbit camera<br>
+    W/S: Move forward/back<br>
+    A/D: Move left/right<br>
+    Q/E: Move down/up<br>
+    Shift: Move faster<br>
+    Scroll: Zoom in/out
+`;
+document.body.appendChild(controlsHelp);
+
 // Add Object Information Display
 const objectInfo = document.createElement('div');
 objectInfo.style.position = 'absolute';
@@ -656,6 +767,9 @@ function animate() {
     requestAnimationFrame(animate);
 
     try {
+        // Update keyboard camera movement
+        updateCameraMovement();
+        
         // Update camera controls
         if (controls) {
             controls.update();
