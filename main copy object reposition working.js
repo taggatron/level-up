@@ -1,8 +1,5 @@
-import * as THREE from 'three';
-import { OrbitControls } from '/Users/danieltagg/Desktop/levelup/dist/three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js';
+// Remove all import statements and use global THREE, GLTFLoader, FBXLoader, EXRLoader, OrbitControls
+// (CDN scripts will be loaded in index.html)
 
 // Create the scene
 const scene = new THREE.Scene();
@@ -25,7 +22,7 @@ camera.position.z = -6.05;
 camera.position.y = 4.41;
 
 // Add orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // Optional for smoother controls
 controls.dampingFactor = 0.05; // Optional
 
