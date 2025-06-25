@@ -27,7 +27,7 @@ controls.enableDamping = true; // Optional for smoother controls
 controls.dampingFactor = 0.05; // Optional
 
 // Add HDR environment map
-const exrLoader = new EXRLoader();
+const exrLoader = new THREE.EXRLoader();
 exrLoader.load('/assets/hdr_environment.exr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture;
