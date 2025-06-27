@@ -195,6 +195,42 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'counterpusher.glb', scene, (mesh
     populateObjectList();
 });
 
+// GLB Model: Level Title Holder
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'lvltitleholder.glb', scene, (meshes) => {
+    const model = meshes[0].parent || meshes[0];
+    model.position.set(1.5, 0.5, -2.5);
+    model.scaling.set(0.5, 0.5, 0.5);
+    model.name = 'Level Title Holder';
+    populateObjectList();
+});
+
+// GLB Model: Plus Counter Blue
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pluscounterblue.glb', scene, (meshes) => {
+    const model = meshes[0].parent || meshes[0];
+    model.position.set(-2, 0.5, 2);
+    model.scaling.set(0.3, 0.3, 0.3);
+    model.name = 'Plus Counter Blue';
+    populateObjectList();
+});
+
+// GLB Model: Triangle Counter Yellow
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'trianglecounteryellow.glb', scene, (meshes) => {
+    const model = meshes[0].parent || meshes[0];
+    model.position.set(2, 0.5, 2);
+    model.scaling.set(0.3, 0.3, 0.3);
+    model.name = 'Triangle Counter Yellow';
+    populateObjectList();
+});
+
+// GLB Model: Pusher
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => {
+    const model = meshes[0].parent || meshes[0];
+    model.position.set(0, 0.5, -2);
+    model.scaling.set(0.4, 0.4, 0.4);
+    model.name = 'Pusher';
+    populateObjectList();
+});
+
 // UI Overlays (Camera coords, controls help, object info, object list, position controls)
 const cameraCoords = document.createElement('div');
 cameraCoords.style.position = 'absolute';
