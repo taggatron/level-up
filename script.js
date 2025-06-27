@@ -164,8 +164,9 @@ addLight2.position = new BABYLON.Vector3(0, 10, 0);
 // GLB Model: Level Up Title
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene, (meshes) => {
     const model = meshes[0].parent || meshes[0];
-    model.position.set(1.5, 1, 0);
-    model.scaling.set(0.5, 0.5, 0.5);
+    model.position.set(2.06, 0.80, 1.60);
+    model.scaling.set(0.01, 0.01, 0.01);
+    model.rotation.set(0, 0, 0);
     model.getChildMeshes().forEach(mesh => mesh.material = levelUpTitleMaterial);
     model.name = 'Level Up Title';
 });
@@ -198,8 +199,9 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'counterpusher.glb', scene, (mesh
 // GLB Model: Level Title Holder
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'lvltitleholder.glb', scene, (meshes) => {
     const model = meshes[0].parent || meshes[0];
-    model.position.set(1.5, 0.5, -2.5);
-    model.scaling.set(0.5, 0.5, 0.5);
+    model.position.set(0.20, 0.50, -1.80);
+    model.scaling.set(0.011, 0.011, 0.01);
+    model.rotation.set(0, 0, 0);
     model.name = 'Level Title Holder';
     populateObjectList();
 });
