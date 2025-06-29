@@ -104,21 +104,14 @@ step3.position.set(0, 1.5, 1.2);
 step3.material = boardMaterial;
 
 // Table
-const tableTop = BABYLON.MeshBuilder.CreateBox('Table Top', {width:5, height:0.2, depth:5}, scene);
-tableTop.position.set(0, -0.5, 0);
-tableTop.material = woodMaterial;
-const tableLeg1 = BABYLON.MeshBuilder.CreateBox('Table Leg Front Right', {width:0.2, height:2, depth:0.2}, scene);
-tableLeg1.position.set(2, -1.5, 2);
-tableLeg1.material = woodMaterial;
-const tableLeg2 = BABYLON.MeshBuilder.CreateBox('Table Leg Front Left', {width:0.2, height:2, depth:0.2}, scene);
-tableLeg2.position.set(2, -1.5, -2);
-tableLeg2.material = woodMaterial;
-const tableLeg3 = BABYLON.MeshBuilder.CreateBox('Table Leg Back Right', {width:0.2, height:2, depth:0.2}, scene);
-tableLeg3.position.set(-2, -1.5, 2);
-tableLeg3.material = woodMaterial;
-const tableLeg4 = BABYLON.MeshBuilder.CreateBox('Table Leg Back Left', {width:0.2, height:2, depth:0.2}, scene);
-tableLeg4.position.set(-2, -1.5, -2);
-tableLeg4.material = woodMaterial;
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'Table.glb', scene, (meshes) => {
+    const table = meshes[0].parent || meshes[0];
+    table.position.set(0, -2.6, -0.5); // Updated position from image
+    table.scaling.set(6, 3, 8); // Updated scale from image
+    table.rotation.set(0, 0, 0);
+    table.name = 'Table';
+    populateObjectList();
+});
 
 // Floor (reflective stone)
 const floor = BABYLON.MeshBuilder.CreateGround('Floor', {width:20, height:20}, scene);
