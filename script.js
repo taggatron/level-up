@@ -14,7 +14,7 @@ const scene = new BABYLON.Scene(engine);
 scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 
 // Camera (ArcRotate for orbit, Universal for WASD)
-const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(4.95, 4.41, -6.05), scene);
+const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(-5.67, 7.36, -14.27), scene);
 camera.setTarget(new BABYLON.Vector3(0, 1, 0.2));
 camera.attachControl(canvas, true);
 camera.speed = 0.3;
@@ -224,13 +224,17 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'trianglecounteryellow.glb', scen
     populateObjectList();
 });
 
-// GLB Model: Pusher
-BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => {
-    const model = meshes[0].parent || meshes[0];
-    model.position.set(0, 0.5, -2);
-    model.scaling.set(0.4, 0.4, 0.4);
-    model.name = 'Pusher';
-    populateObjectList();
+// GLB Model: Pusher (and clones)
+const pusherPositions = [-1.5, -0.5, 0.5, 1.5]; // Evenly spaced across step1 (width 4)
+const pusherNames = ['Pusher 1.1', 'Pusher 1.2', 'Pusher 1.3', 'Pusher 1.4'];
+pusherPositions.forEach((x, i) => {
+    BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => {
+        const model = meshes[0].parent || meshes[0];
+        model.position.set(x, 0.2, -2.0); // Y: 0.2, Z: -2.0 as in image
+        model.scaling.set(0.1, 0.1, 0.1); // As in image
+        model.name = pusherNames[i];
+        populateObjectList();
+    });
 });
 
 // UI Overlays (Camera coords, controls help, object info, object list, position controls)
@@ -279,6 +283,11 @@ objectList.style.left = '10px';
 objectList.style.color = 'white';
 objectList.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
 objectList.style.padding = '10px';
+objectList.style.maxHeight = '60vh'; // Use viewport height for better responsiveness
+objectList.style.overflowY = 'scroll'; // Force scroll bar to always show
+objectList.tabIndex = 0; // Make it focusable for keyboard scroll
+objectList.style.overflowX = 'hidden';
+objectList.style.width = '250px'; // Ensure a fixed width for scroll
 document.body.appendChild(objectList);
 
 const positionControls = document.createElement('div');
