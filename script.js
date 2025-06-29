@@ -92,16 +92,39 @@ wallMaterial.ambientTexture = loadTexture('/wall_ao.jpg');
 wallMaterial.metallicTexture = loadTexture('/wall_metallic.jpg');
 wallMaterial.displacementTexture = loadTexture('/wall_displacement.tiff');
 
-// Steps
-const step1 = BABYLON.MeshBuilder.CreateBox('Stair Step 1', {width:4, height:1, depth:1}, scene);
+// Lighting
+const ambientLight = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
+ambientLight.intensity = 1.5;
+const dirLight = new BABYLON.DirectionalLight('dirLight', new BABYLON.Vector3(5, 10, 7.5), scene);
+dirLight.intensity = 1;
+dirLight.position = new BABYLON.Vector3(5, 10, 7.5);
+const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
+shadowGenerator.useBlurExponentialShadowMap = true;
+shadowGenerator.blurKernel = 32;
+const addLight1 = new BABYLON.DirectionalLight('addLight1', new BABYLON.Vector3(-5, 8, -5), scene);
+addLight1.intensity = 0.8;
+addLight1.position = new BABYLON.Vector3(-5, 8, -5);
+const addLight2 = new BABYLON.DirectionalLight('addLight2', new BABYLON.Vector3(0, 10, 0), scene);
+addLight2.intensity = 0.6;
+addLight2.position = new BABYLON.Vector3(0, 10, 0);
+
+// Steps (moved after shadowGenerator is defined)
+let step1, step2, step3;
+step1 = BABYLON.MeshBuilder.CreateBox('Stair Step 1', {width:4, height:1, depth:1}, scene);
 step1.position.set(0, 0.5, -0.8);
 step1.material = boardMaterial;
-const step2 = BABYLON.MeshBuilder.CreateBox('Stair Step 2', {width:4, height:2, depth:1}, scene);
+step1.receiveShadows = true;
+shadowGenerator.addShadowCaster(step1, true);
+step2 = BABYLON.MeshBuilder.CreateBox('Stair Step 2', {width:4, height:2, depth:1}, scene);
 step2.position.set(0, 1, 0.2);
 step2.material = boardMaterial;
-const step3 = BABYLON.MeshBuilder.CreateBox('Stair Step 3', {width:4, height:3, depth:1}, scene);
+step2.receiveShadows = true;
+shadowGenerator.addShadowCaster(step2, true);
+step3 = BABYLON.MeshBuilder.CreateBox('Stair Step 3', {width:4, height:3, depth:1}, scene);
 step3.position.set(0, 1.5, 1.2);
 step3.material = boardMaterial;
+step3.receiveShadows = true;
+shadowGenerator.addShadowCaster(step3, true);
 
 // Table
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'Table.glb', scene, (meshes) => {
@@ -110,12 +133,15 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'Table.glb', scene, (meshes) => {
     table.scaling.set(6, 3, 8); // Updated scale from image
     table.rotation.set(0, 0, 0);
     table.name = 'Table';
+    table.receiveShadows = false;
+    shadowGenerator.addShadowCaster(table, true);
     populateObjectList();
 });
 
 // Floor (reflective stone)
 const floor = BABYLON.MeshBuilder.CreateGround('Floor', {width:20, height:20}, scene);
 floor.position.set(0, -2.5, 0);
+floor.receiveShadows = true;
 const reflectiveStoneMaterial = new BABYLON.PBRMaterial('reflectiveStone', scene);
 reflectiveStoneMaterial.albedoTexture = loadTexture('/stone_texture.jpg');
 reflectiveStoneMaterial.bumpTexture = loadTexture('/stone_normal.png');
@@ -128,31 +154,60 @@ reflectiveStoneMaterial.metallic = 1.0;
 reflectiveStoneMaterial.roughness = 0.1;
 floor.material = reflectiveStoneMaterial;
 
-// Walls
-const wall1 = BABYLON.MeshBuilder.CreateBox('Wall 1', {width:20, height:5, depth:0.2}, scene);
-wall1.position.set(0, -0.5, 10);
-wall1.material = wallMaterial;
-const wall2 = BABYLON.MeshBuilder.CreateBox('Wall 2', {width:20, height:5, depth:0.2}, scene);
-wall2.position.set(-10, -0.5, 0);
-wall2.rotation.y = Math.PI / 2;
-wall2.material = wallMaterial;
-const wall3 = BABYLON.MeshBuilder.CreateBox('Wall 3', {width:20, height:5, depth:0.2}, scene);
-wall3.position.set(10, -0.5, 0);
-wall3.rotation.y = -Math.PI / 2;
-wall3.material = wallMaterial;
+// Walls with window cutouts and window models
+const wallHeight = 15; // Tripled from 5 to 15
+const wallWidth = 20;
+const wallDepth = 0.2;
+const windowWidth = 9; // Larger width
+const windowHeight = 4; // Larger height
+const windowY = 2; // Closer to the floor
+const windowZOffset = 0.01; // To avoid z-fighting
 
-// Lighting
-const ambientLight = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-ambientLight.intensity = 2;
-const dirLight = new BABYLON.DirectionalLight('dirLight', new BABYLON.Vector3(5, 10, 7.5), scene);
-dirLight.intensity = 1;
-dirLight.position = new BABYLON.Vector3(5, 10, 7.5);
-const addLight1 = new BABYLON.DirectionalLight('addLight1', new BABYLON.Vector3(-5, 8, -5), scene);
-addLight1.intensity = 0.8;
-addLight1.position = new BABYLON.Vector3(-5, 8, -5);
-const addLight2 = new BABYLON.DirectionalLight('addLight2', new BABYLON.Vector3(0, 10, 0), scene);
-addLight2.intensity = 0.6;
-addLight2.position = new BABYLON.Vector3(0, 10, 0);
+// Helper to create wall with window cutout using CSG
+function createWallWithWindow(name, width, height, depth, windowCenter, windowSize, position, rotation) {
+    // Main wall
+    const wall = BABYLON.MeshBuilder.CreateBox(name + '_base', {width, height, depth}, scene);
+    // Window cutout
+    const windowBox = BABYLON.MeshBuilder.CreateBox(name + '_window', {width: windowSize[0], height: windowSize[1], depth: depth + 0.05}, scene);
+    windowBox.position = windowCenter.clone();
+    // CSG subtraction
+    const wallCSG = BABYLON.CSG.FromMesh(wall);
+    const windowCSG = BABYLON.CSG.FromMesh(windowBox);
+    const wallWithCutout = wallCSG.subtract(windowCSG).toMesh(name, wall.material, scene);
+    wallWithCutout.position = position.clone();
+    if (rotation) wallWithCutout.rotation = rotation.clone();
+    wallWithCutout.material = wallMaterial;
+    wall.dispose();
+    windowBox.dispose();
+    return wallWithCutout;
+}
+
+// Wall 1 (back) - NO WINDOW CUTOUT
+const wall1 = BABYLON.MeshBuilder.CreateBox('Wall 1', {width: wallWidth, height: wallHeight, depth: wallDepth}, scene);
+wall1.position = new BABYLON.Vector3(0, wallHeight/2 - 2.5, 10);
+wall1.rotation = new BABYLON.Vector3(0, 0, 0);
+wall1.material = wallMaterial;
+// Wall 2 (left)
+const wall2WindowCenter = new BABYLON.Vector3(0, windowY, 0);
+const wall2 = createWallWithWindow('Wall 2', wallWidth, wallHeight, wallDepth, wall2WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(-10, wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, Math.PI/2, 0));
+// Wall 3 (right)
+const wall3WindowCenter = new BABYLON.Vector3(0, windowY, 0);
+const wall3 = createWallWithWindow('Wall 3', wallWidth, wallHeight, wallDepth, wall3WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(10, wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, -Math.PI/2, 0));
+
+// Import and place window models in each cutout
+typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('', '/assets/', 'windows.glb', scene, (meshes) => {
+    // Place for wall2 (left)
+    const win2 = meshes[0].clone('Window2');
+    win2.position = new BABYLON.Vector3(-10 - wallDepth/2 - windowZOffset, windowY, 0);
+    win2.scaling = new BABYLON.Vector3(2.5, 1.3, 1.2);
+    win2.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
+    // Place for wall3 (right)
+    const win3 = meshes[0].clone('Window3');
+    win3.position = new BABYLON.Vector3(10 + wallDepth/2 + windowZOffset, windowY, 0);
+    win3.scaling = new BABYLON.Vector3(2.5, 1.3, 1.2);
+    win3.rotation = new BABYLON.Vector3(0, -Math.PI/2, 0);
+    populateObjectList();
+});
 
 // GLB Model: Level Up Title
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene, (meshes) => {
