@@ -158,9 +158,9 @@ floor.material = reflectiveStoneMaterial;
 const wallHeight = 15; // Tripled from 5 to 15
 const wallWidth = 20;
 const wallDepth = 0.2;
-const windowWidth = 9; // Larger width
-const windowHeight = 4; // Larger height
-const windowY = 2; // Closer to the floor
+const windowWidth = 9 * 1.25; // 25% larger
+const windowHeight = 4 * 1.25; // 25% larger
+const windowY = 1; // Move windows further down
 const windowZOffset = 0.01; // To avoid z-fighting
 
 // Helper to create wall with window cutout using CSG
@@ -199,12 +199,12 @@ typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('',
     // Place for wall2 (left)
     const win2 = meshes[0].clone('Window2');
     win2.position = new BABYLON.Vector3(-10 - wallDepth/2 - windowZOffset, windowY, 0);
-    win2.scaling = new BABYLON.Vector3(2.5, 1.3, 1.2);
+    win2.scaling = new BABYLON.Vector3(2.5 * 1.25, 1.3 * 1.25, 1.2 * 1.25); // 25% larger
     win2.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
     // Place for wall3 (right)
     const win3 = meshes[0].clone('Window3');
     win3.position = new BABYLON.Vector3(10 + wallDepth/2 + windowZOffset, windowY, 0);
-    win3.scaling = new BABYLON.Vector3(2.5, 1.3, 1.2);
+    win3.scaling = new BABYLON.Vector3(2.5 * 1.25, 1.3 * 1.25, 1.2 * 1.25);
     win3.rotation = new BABYLON.Vector3(0, -Math.PI/2, 0);
     populateObjectList();
 });
