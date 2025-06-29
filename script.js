@@ -93,13 +93,13 @@ wallMaterial.metallicTexture = loadTexture('/wall_metallic.jpg');
 wallMaterial.displacementTexture = loadTexture('/wall_displacement.tiff');
 
 // Steps
-const step1 = BABYLON.MeshBuilder.CreateBox('Stair Step 1', {width:3, height:1, depth:1}, scene);
+const step1 = BABYLON.MeshBuilder.CreateBox('Stair Step 1', {width:4, height:1, depth:1}, scene);
 step1.position.set(0, 0.5, -0.8);
 step1.material = boardMaterial;
-const step2 = BABYLON.MeshBuilder.CreateBox('Stair Step 2', {width:3, height:2, depth:1}, scene);
+const step2 = BABYLON.MeshBuilder.CreateBox('Stair Step 2', {width:4, height:2, depth:1}, scene);
 step2.position.set(0, 1, 0.2);
 step2.material = boardMaterial;
-const step3 = BABYLON.MeshBuilder.CreateBox('Stair Step 3', {width:3, height:3, depth:1}, scene);
+const step3 = BABYLON.MeshBuilder.CreateBox('Stair Step 3', {width:4, height:3, depth:1}, scene);
 step3.position.set(0, 1.5, 1.2);
 step3.material = boardMaterial;
 
@@ -199,8 +199,8 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'counterpusher.glb', scene, (mesh
 // GLB Model: Level Title Holder
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'lvltitleholder.glb', scene, (meshes) => {
     const model = meshes[0].parent || meshes[0];
-    model.position.set(0.20, 0.50, -1.80);
-    model.scaling.set(0.011, 0.011, 0.01);
+    model.position.set(0.10, 0.40, -1.47);
+    model.scaling.set(0.0125, 0.011, 0.01);
     model.rotation.set(0, 0, 0);
     model.name = 'Level Title Holder';
     populateObjectList();
