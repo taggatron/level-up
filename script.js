@@ -212,7 +212,7 @@ typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('',
 // GLB Model: Level Up Title
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene, (meshes) => {
     const model = meshes[0].parent || meshes[0];
-    model.position.set(2.06, 0.80, 1.60);
+    model.position.set(2.56, 0.80, 1.60);
     model.scaling.set(0.01, 0.01, 0.01);
     model.rotation.set(0, 0, 0);
     model.getChildMeshes().forEach(mesh => mesh.material = levelUpTitleMaterial);
