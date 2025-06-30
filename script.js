@@ -230,19 +230,7 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'plant.glb', scene, (meshes) => {
 });
 
 // GLB Model: Counterpusher
-BABYLON.SceneLoader.ImportMesh('', '/assets/', 'counterpusher.glb', scene, (meshes) => {
-    const model = meshes[0].parent || meshes[0];
-    const customMaterial = new BABYLON.StandardMaterial('counterMat', scene);
-    customMaterial.diffuseTexture = loadTexture('/lvltitleholder.jpg');
-    customMaterial.bumpTexture = loadTexture('/board_normal.png');
-    customMaterial.ambientTexture = loadTexture('/board_ao.jpg');
-    customMaterial.metallicTexture = loadTexture('/board_metallic.jpg');
-    model.getChildMeshes().forEach(mesh => mesh.material = customMaterial);
-    model.scaling.set(0.5, 0.5, 0.5);
-    model.position.set(0, 0, 0);
-    model.name = 'Counter Pusher';
-    populateObjectList();
-});
+// Removed import for missing counterpusher.glb
 
 // GLB Model: Level Title Holder
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'lvltitleholder.glb', scene, (meshes) => {
