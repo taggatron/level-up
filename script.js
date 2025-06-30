@@ -209,15 +209,38 @@ typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('',
     populateObjectList();
 });
 
-// GLB Model: Level Up Title
-BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene, (meshes) => {
-    const model = meshes[0].parent || meshes[0];
-    model.position.set(2.56, 0.80, 1.60);
-    model.scaling.set(0.01, 0.01, 0.01);
-    model.rotation.set(0, 0, 0);
-    model.getChildMeshes().forEach(mesh => mesh.material = levelUpTitleMaterial);
-    model.name = 'Level Up Title';
-});
+// LevelUpTitle class for reusable title mesh
+class LevelUpTitle {
+    constructor(name, position, rotation, scene, material) {
+        this.mesh = null;
+        BABYLON.SceneLoader.ImportMesh('', '/assets/', 'leveluptitle3dwords.glb', scene, (meshes) => {
+            const model = meshes[0].parent || meshes[0];
+            model.position.copyFrom(position);
+            model.scaling.set(0.01, 0.01, 0.01);
+            model.rotationQuaternion = null;
+            model.rotation.copyFrom(rotation);
+            model.getChildMeshes().forEach(mesh => mesh.material = material);
+            model.name = name;
+            this.mesh = model;
+        });
+    }
+}
+
+// Create two instances of LevelUpTitle
+const title1 = new LevelUpTitle(
+    'Level Up Title',
+    new BABYLON.Vector3(-2.56, 0.50, 1.60),
+    new BABYLON.Vector3(0, 0, 0),
+    scene,
+    levelUpTitleMaterial
+);
+const title2 = new LevelUpTitle(
+    'Level Up Title (Opposite)',
+    new BABYLON.Vector3(2.56, 0.80, 1.60),
+    new BABYLON.Vector3(0, Math.PI, 0),
+    scene,
+    levelUpTitleMaterial
+);
 
 // FBX Model: Plant
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'plant.glb', scene, (meshes) => {
