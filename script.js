@@ -503,6 +503,13 @@ function populateObjectList() {
 
 populateObjectList();
 
+// Ceiling (same texture as walls)
+const ceiling = BABYLON.MeshBuilder.CreateBox('Ceiling', {width: wallWidth, height: wallDepth, depth: wallWidth}, scene);
+ceiling.position = new BABYLON.Vector3(0, wallHeight - 2.5 + wallDepth/2, 0); // Y matches top of walls
+ceiling.material = wallMaterial;
+ceiling.receiveShadows = true;
+shadowGenerator.addShadowCaster(ceiling, true);
+
 // Animate Counter Pusher
 let direction = 1;
 const speed = 0.01;
