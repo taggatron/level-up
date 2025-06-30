@@ -198,14 +198,14 @@ const wall3 = createWallWithWindow('Wall 3', wallWidth, wallHeight, wallDepth, w
 typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('', '/assets/', 'windows.glb', scene, (meshes) => {
     // Place for wall2 (left)
     const win2 = meshes[0].clone('Window2');
-    win2.position = new BABYLON.Vector3(-10 - wallDepth/2 - windowZOffset, windowY, 0);
-    win2.scaling = new BABYLON.Vector3(2.5 * 1.25, 1.3 * 1.25, 1.2 * 1.25); // 25% larger
-    win2.rotation = new BABYLON.Vector3(0, Math.PI/2, 0);
+    win2.position = new BABYLON.Vector3(-9.90, 3.50, 0.00); // Updated from pasted image
+    win2.scaling = new BABYLON.Vector3(5.15, 3.32, 2.10);   // Updated from pasted image
+    win2.rotation = new BABYLON.Vector3(0.0, Math.PI/2, 0.00); // Rotation X: 0.40 rad, Y: 90 deg, Z: 0
     // Place for wall3 (right)
     const win3 = meshes[0].clone('Window3');
-    win3.position = new BABYLON.Vector3(10 + wallDepth/2 + windowZOffset, windowY, 0);
-    win3.scaling = new BABYLON.Vector3(2.5 * 1.25, 1.3 * 1.25, 1.2 * 1.25);
-    win3.rotation = new BABYLON.Vector3(0, -Math.PI/2, 0);
+    win3.position = new BABYLON.Vector3(9.90, 3.50, 0.00); // Mirrored X for opposite wall
+    win3.scaling = new BABYLON.Vector3(5.15, 3.32, 2.10);   // Same scale as window 2
+    win3.rotation = new BABYLON.Vector3(0.0, -Math.PI/2, 0.00); // Y: -90 deg for opposite wall
     populateObjectList();
 });
 
@@ -219,17 +219,53 @@ class LevelUpTitle {
             model.scaling.set(0.01, 0.01, 0.01);
             model.rotationQuaternion = null;
             model.rotation.copyFrom(rotation);
-            model.getChildMeshes().forEach(mesh => mesh.material = material);
+            // Create a glowing blue material
+            const glowMat = new BABYLON.StandardMaterial(name + '_GlowMat', scene);
+            glowMat.diffuseTexture = material.diffuseTexture;
+            glowMat.bumpTexture = material.bumpTexture;
+            glowMat.ambientTexture = material.ambientTexture;
+            glowMat.emissiveColor = new BABYLON.Color3(0.2, 0.5, 1.0); // Blue glow
+            glowMat.emissiveIntensity = 50.0;
+            model.getChildMeshes().forEach(mesh => mesh.material = glowMat);
             model.name = name;
             this.mesh = model;
+            // Add to glow layer for extra effect
+            if (!scene._levelUpGlowLayer) {
+                scene._levelUpGlowLayer = new BABYLON.GlowLayer('levelUpGlow', scene, { blurKernelSize: 512 });
+                // Set the glow color to blue
+                scene._levelUpGlowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
+                    result.set(0.2, 0.5, 1.0, 1.0); // Blue RGBA
+                };
+            }
+            scene._levelUpGlowLayer.addIncludedOnlyMesh(model);
         });
     }
+}
+
+// Helper to create a glowing orb
+function createGlowingOrb(name, position, scene) {
+    const orb = BABYLON.MeshBuilder.CreateSphere(name, {diameter: 0.3, segments: 32}, scene);
+    orb.position.copyFrom(position);
+    const orbMat = new BABYLON.StandardMaterial(name + '_mat', scene);
+    orbMat.emissiveColor = new BABYLON.Color3(0.2, 0.5, 1.0); // Blue
+    orbMat.emissiveIntensity = 50.0;
+    orbMat.diffuseColor = new BABYLON.Color3(0.2, 0.5, 1.0); // Set diffuse to blue for fallback
+    orb.material = orbMat;
+    if (!scene._levelUpGlowLayer) {
+        scene._levelUpGlowLayer = new BABYLON.GlowLayer('levelUpGlow', scene, { blurKernelSize: 512 });
+        // Remove customEmissiveColorSelector so the orb's own emissive color is used
+        // scene._levelUpGlowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
+        //     result.set(0.2, 0.5, 1.0, 1.0);
+        // };
+    }
+    scene._levelUpGlowLayer.addIncludedOnlyMesh(orb);
+    return orb;
 }
 
 // Create two instances of LevelUpTitle
 const title1 = new LevelUpTitle(
     'Level Up Title',
-    new BABYLON.Vector3(-2.56, 0.50, 1.60),
+    new BABYLON.Vector3(-2.56, 0.80, 0.50),
     new BABYLON.Vector3(0, 0, 0),
     scene,
     levelUpTitleMaterial
@@ -241,6 +277,9 @@ const title2 = new LevelUpTitle(
     scene,
     levelUpTitleMaterial
 );
+// Add glowing orbs next to each title
+createGlowingOrb('Orb1', new BABYLON.Vector3(-2.56, 1.1, 0.20), scene);
+createGlowingOrb('Orb2', new BABYLON.Vector3(2.56, 1.1, 1.90), scene);
 
 // FBX Model: Plant
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'plant.glb', scene, (meshes) => {
