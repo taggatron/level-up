@@ -126,6 +126,33 @@ step3.material = boardMaterial;
 step3.receiveShadows = true;
 shadowGenerator.addShadowCaster(step3, true);
 
+// Pusher animation + visibility culling state
+const appStartTimeMs = performance.now();
+const pusherAnimationDurationMs = 5000;
+const pusherAnimAmplitudeZ = 0.35;
+const pusherAnimSpeedHz = 1.25;
+let pushersAnimationFinished = false;
+/** @type {{mesh: BABYLON.TransformNode, baseZ: number}[]} */
+const animatedPushers = [];
+
+/** @type {BABYLON.Plane[]} */
+const frustumPlanesScratch = [];
+for (let i = 0; i < 6; i++) {
+    frustumPlanesScratch.push(new BABYLON.Plane(0, 0, 0, 0));
+}
+
+const skyboxName = 'hdrSkyBox';
+function updateVisibilityCulling() {
+    // Babylon cameras don't consistently expose getFrustumPlanes(); use scene transform matrix instead.
+    BABYLON.Frustum.GetPlanesToRef(scene.getTransformMatrix(), frustumPlanesScratch);
+    for (const mesh of scene.meshes) {
+        if (!mesh || !mesh.isEnabled() || mesh.name === skyboxName) continue;
+        if (typeof mesh.getBoundingInfo !== 'function' || typeof mesh.isInFrustum !== 'function') continue;
+        const inFrustum = mesh.isInFrustum(frustumPlanesScratch);
+        mesh.isVisible = inFrustum;
+    }
+}
+
 // Table
 BABYLON.SceneLoader.ImportMesh('', '/assets/', 'Table.glb', scene, (meshes) => {
     const table = meshes[0].parent || meshes[0];
@@ -224,20 +251,21 @@ class LevelUpTitle {
             glowMat.diffuseTexture = material.diffuseTexture;
             glowMat.bumpTexture = material.bumpTexture;
             glowMat.ambientTexture = material.ambientTexture;
-            glowMat.emissiveColor = new BABYLON.Color3(0.2, 0.5, 1.0); // Blue glow
-            glowMat.emissiveIntensity = 50.0;
-            model.getChildMeshes().forEach(mesh => mesh.material = glowMat);
+            glowMat.emissiveColor = new BABYLON.Color3(0.25, 0.6, 1.0); // Blue glow
+            model.getChildMeshes().forEach(mesh => (mesh.material = glowMat));
             model.name = name;
             this.mesh = model;
             // Add to glow layer for extra effect
             if (!scene._levelUpGlowLayer) {
                 scene._levelUpGlowLayer = new BABYLON.GlowLayer('levelUpGlow', scene, { blurKernelSize: 512 });
+                scene._levelUpGlowLayer.intensity = 1.2;
                 // Set the glow color to blue
                 scene._levelUpGlowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
                     result.set(0.2, 0.5, 1.0, 1.0); // Blue RGBA
                 };
             }
-            scene._levelUpGlowLayer.addIncludedOnlyMesh(model);
+            // Include the actual rendered meshes (not just the root transform)
+            model.getChildMeshes().forEach((m) => scene._levelUpGlowLayer.addIncludedOnlyMesh(m));
         });
     }
 }
@@ -323,16 +351,37 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'trianglecounteryellow.glb', scen
 });
 
 // GLB Model: Pusher (and clones)
-const pusherPositions = [-1.5, -0.5, 0.5, 1.5]; // Evenly spaced across step1 (width 4)
-const pusherNames = ['Pusher 1.1', 'Pusher 1.2', 'Pusher 1.3', 'Pusher 1.4'];
-pusherPositions.forEach((x, i) => {
-    BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => {
-        const model = meshes[0].parent || meshes[0];
-        model.position.set(x, 0.2, -2.0); // Y: 0.2, Z: -2.0 as in image
-        model.scaling.set(0.1, 0.1, 0.1); // As in image
-        model.name = pusherNames[i];
-        populateObjectList();
+const stairSteps = [
+    { mesh: step1, height: 1 },
+    { mesh: step2, height: 2 },
+    { mesh: step3, height: 3 },
+];
+const pusherXOffsets = [-1.5, -0.5, 0.5, 1.5]; // Evenly spaced across a 4-unit-wide step
+const pusherYOffsetFromStepBottom = 0.2;
+const pusherZOffsetFromStepCenter = -1.2;
+
+BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => {
+    const template = meshes[0].parent || meshes[0];
+    template.scaling.set(0.1, 0.1, 0.1);
+    template.setEnabled(false);
+
+    stairSteps.forEach((step, stepIndex) => {
+        const baseY = step.mesh.position.y - step.height / 2 + pusherYOffsetFromStepBottom;
+        const baseZ = step.mesh.position.z + pusherZOffsetFromStepCenter;
+
+        pusherXOffsets.forEach((xOffset, pusherIndex) => {
+            const name = `Pusher ${stepIndex + 1}.${pusherIndex + 1}`;
+            const clone = template.clone(name);
+            clone.setEnabled(true);
+            clone.position.set(step.mesh.position.x + xOffset, baseY, baseZ);
+            clone.name = name;
+
+            clone.getChildMeshes().forEach((m) => shadowGenerator.addShadowCaster(m, true));
+            animatedPushers.push({ mesh: clone, baseZ: clone.position.z });
+        });
     });
+
+    populateObjectList();
 });
 
 // UI Overlays (Camera coords, controls help, object info, object list, position controls)
@@ -521,6 +570,25 @@ scene.onBeforeRenderObservable.add(() => {
             direction *= -1;
         }
     }
+
+    // Animate pushers along Z for the first 5 seconds
+    const elapsedMs = performance.now() - appStartTimeMs;
+    if (elapsedMs < pusherAnimationDurationMs) {
+        const t = elapsedMs / 1000;
+        const offsetZ = pusherAnimAmplitudeZ * Math.sin(t * Math.PI * 2 * pusherAnimSpeedHz);
+        for (const p of animatedPushers) {
+            p.mesh.position.z = p.baseZ + offsetZ;
+        }
+    } else if (!pushersAnimationFinished) {
+        for (const p of animatedPushers) {
+            p.mesh.position.z = p.baseZ;
+        }
+        pushersAnimationFinished = true;
+    }
+
+    // Avoid rendering meshes behind the camera / out of shot
+    updateVisibilityCulling();
+
     // Camera coordinates display
     const x = camera.position.x.toFixed(2);
     const y = camera.position.y.toFixed(2);
