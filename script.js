@@ -366,7 +366,21 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'pusher.glb', scene, (meshes) => 
     template.setEnabled(false);
 
     stairSteps.forEach((step, stepIndex) => {
-        const baseY = step.mesh.position.y - step.height / 2 + pusherYOffsetFromStepBottom;
+        // Determine baseY for pushers. For step2 and step3 use fixed bottoms requested by user,
+        // otherwise compute from the mesh bounding box for step1.
+        let baseY;
+        if (stepIndex === 1) {
+            // Stair Step 2 bottom should be 1.15
+            baseY = 1.15 + pusherYOffsetFromStepBottom;
+        } else if (stepIndex === 2) {
+            // Stair Step 3 bottom should be 2.15
+            baseY = 2.15 + pusherYOffsetFromStepBottom;
+        } else {
+            step.mesh.computeWorldMatrix(true);
+            step.mesh.refreshBoundingInfo(true);
+            const stepBottomY = step.mesh.getBoundingInfo().boundingBox.minimumWorld.y;
+            baseY = stepBottomY + pusherYOffsetFromStepBottom;
+        }
         const baseZ = step.mesh.position.z + pusherZOffsetFromStepCenter;
 
         pusherXOffsets.forEach((xOffset, pusherIndex) => {
