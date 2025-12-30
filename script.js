@@ -166,7 +166,8 @@ BABYLON.SceneLoader.ImportMesh('', '/assets/', 'Table.glb', scene, (meshes) => {
 });
 
 // Floor (reflective stone)
-const floor = BABYLON.MeshBuilder.CreateGround('Floor', {width:20, height:20}, scene);
+const roomSize = 40; // Increased room size (was effectively 20)
+const floor = BABYLON.MeshBuilder.CreateGround('Floor', {width: roomSize, height: roomSize}, scene);
 floor.position.set(0, -2.5, 0);
 floor.receiveShadows = true;
 const reflectiveStoneMaterial = new BABYLON.PBRMaterial('reflectiveStone', scene);
@@ -183,7 +184,7 @@ floor.material = reflectiveStoneMaterial;
 
 // Walls with window cutouts and window models
 const wallHeight = 15; // Tripled from 5 to 15
-const wallWidth = 20;
+const wallWidth = roomSize;
 const wallDepth = 0.2;
 const windowWidth = 9 * 1.25; // 25% larger
 const windowHeight = 4 * 1.25; // 25% larger
@@ -211,26 +212,26 @@ function createWallWithWindow(name, width, height, depth, windowCenter, windowSi
 
 // Wall 1 (back) - NO WINDOW CUTOUT
 const wall1 = BABYLON.MeshBuilder.CreateBox('Wall 1', {width: wallWidth, height: wallHeight, depth: wallDepth}, scene);
-wall1.position = new BABYLON.Vector3(0, wallHeight/2 - 2.5, 10);
+wall1.position = new BABYLON.Vector3(0, wallHeight/2 - 2.5, roomSize / 2);
 wall1.rotation = new BABYLON.Vector3(0, 0, 0);
 wall1.material = wallMaterial;
 // Wall 2 (left)
 const wall2WindowCenter = new BABYLON.Vector3(0, windowY, 0);
-const wall2 = createWallWithWindow('Wall 2', wallWidth, wallHeight, wallDepth, wall2WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(-10, wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, Math.PI/2, 0));
+const wall2 = createWallWithWindow('Wall 2', wallWidth, wallHeight, wallDepth, wall2WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(-(roomSize / 2), wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, Math.PI/2, 0));
 // Wall 3 (right)
 const wall3WindowCenter = new BABYLON.Vector3(0, windowY, 0);
-const wall3 = createWallWithWindow('Wall 3', wallWidth, wallHeight, wallDepth, wall3WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(10, wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, -Math.PI/2, 0));
+const wall3 = createWallWithWindow('Wall 3', wallWidth, wallHeight, wallDepth, wall3WindowCenter, [windowWidth, windowHeight], new BABYLON.Vector3(roomSize / 2, wallHeight/2 - 2.5, 0), new BABYLON.Vector3(0, -Math.PI/2, 0));
 
 // Import and place window models in each cutout
 typeof BABYLON.SceneLoader !== 'undefined' && BABYLON.SceneLoader.ImportMesh('', '/assets/', 'windows.glb', scene, (meshes) => {
     // Place for wall2 (left)
     const win2 = meshes[0].clone('Window2');
-    win2.position = new BABYLON.Vector3(-9.90, 3.50, 0.00); // Updated from pasted image
+    win2.position = new BABYLON.Vector3(-(roomSize / 2) + 0.10, 3.50, 0.00); // Keep aligned to wall 2
     win2.scaling = new BABYLON.Vector3(5.15, 3.32, 2.10);   // Updated from pasted image
     win2.rotation = new BABYLON.Vector3(0.0, Math.PI/2, 0.00); // Rotation X: 0.40 rad, Y: 90 deg, Z: 0
     // Place for wall3 (right)
     const win3 = meshes[0].clone('Window3');
-    win3.position = new BABYLON.Vector3(9.90, 3.50, 0.00); // Mirrored X for opposite wall
+    win3.position = new BABYLON.Vector3((roomSize / 2) - 0.10, 3.50, 0.00); // Keep aligned to wall 3
     win3.scaling = new BABYLON.Vector3(5.15, 3.32, 2.10);   // Same scale as window 2
     win3.rotation = new BABYLON.Vector3(0.0, -Math.PI/2, 0.00); // Y: -90 deg for opposite wall
     populateObjectList();
